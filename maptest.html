@@ -1,35 +1,84 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8" />
-<title>Add a default marker</title>
-<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-<script src="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.css" rel="stylesheet" />
-<style>
-	body { margin: 0; padding: 0; }
-	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
-</style>
-</head>
-<body>
-<div id="map"></div>
+    <head>
+        <meta charset="utf-8" />
+        <title>Add a default marker</title>
+        <meta
+            name="viewport"
+            content="initial-scale=1,maximum-scale=1,user-scalable=no"
+        />
 
-<script>
-	// TO MAKE THE MAP APPEAR YOU MUST
-	// ADD YOUR ACCESS TOKEN FROM
-	// https://account.mapbox.com
-	mapboxgl.accessToken = 'pk.eyJ1IjoieWFhY2luZTEyIiwiYSI6ImNrYzNrd2gydjEyemEydGxrbzhleWkwaHIifQ.TnOnKQn9B_CR5RpwZnyE0A';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [3.0588,36.7538],
-        zoom: 12
-    });
+        <script src="vendors/jquery/dist/jquery.min.js"></script>
+        <script src="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.js"></script>
+        <link
+            href="https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.css"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            #map {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 100%;
+            }
 
-    var marker = new mapboxgl.Marker()
-        .setLngLat([12.550343, 55.665957])
-        .addTo(map);
-</script>
+            #marker {
+                background-image: url("https://docs.mapbox.com/mapbox-gl-js/assets/washington-monument.jpg");
+                background-size: cover;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                cursor: pointer;
+            }
 
-</body>
+            .mapboxgl-popup {
+                max-width: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+
+        <script>
+            // TO MAKE THE MAP APPEAR YOU MUST
+            // ADD YOUR ACCESS TOKEN FROM
+            // https://account.mapbox.com
+            mapboxgl.accessToken =
+                "pk.eyJ1IjoieWFhY2luZTEyIiwiYSI6ImNrYzNrd2gydjEyemEydGxrbzhleWkwaHIifQ.TnOnKQn9B_CR5RpwZnyE0A";
+            var map = new mapboxgl.Map({
+                container: "map",
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: [3.0588, 36.7538],
+                zoom: 6,
+            });
+
+            let host = "https://watchcovout-api.herokuapp.com";
+
+            jQuery.get(host + "/api/v0/places/", function (data, status) {
+                console.log("placess ");
+                console.log(JSON.stringify(data, null, 2));
+
+                data.forEach((element) => {
+                   
+                    var popup = new mapboxgl.Popup({ offset: 25 }).setText(
+                        element.title + "  |  "+element.numberOfPlaces+" places"
+                    );
+                    var marker = new mapboxgl.Marker()
+                        .setPopup(popup)
+                        .setLngLat([
+                            element.location.longitude,
+                            element.location.latitude,
+                        ])
+                        .addTo(map);
+                });
+            });
+            var marker = new mapboxgl.Marker()
+                .setLngLat([3.0588, 36.7538])
+                .addTo(map);
+        </script>
+    </body>
 </html>

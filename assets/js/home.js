@@ -1,5 +1,5 @@
 (function ($) {
-    let host = "http://localhost:8081";
+    let host = "https://watchcovout-api.herokuapp.com";
     $(document).ready(function () {
         console.log("wa are here 1");
         $.get(host + "/api/v0/users/", function (data, status) {

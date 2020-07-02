@@ -1,4 +1,4 @@
-const backendURL = `http://localhost:3000/api/v0`;
+const backendURL = `http://localhost:8081/api/v0`;
 jQuery(document).ready(function ($) {
 
     jQuery(document).ready(function ($) {
@@ -10,6 +10,12 @@ jQuery(document).ready(function ($) {
             $('#usersTable').DataTable().clear().destroy();
             $('#usersTable').DataTable({
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                'columnDefs': [
+                    {
+                        "targets": -1,
+                        "className": "text-center"
+                    }
+                ],
                 ajax: {
                     url: `${backendURL}/users`,
                     dataSrc: ""
@@ -17,21 +23,26 @@ jQuery(document).ready(function ($) {
                 columns: [
                     {"data": (e)=>{
                         return `<a type="button" target="_blank" href="${e.nationalCardPicURL}" class="btn btn-link btn-lg btn-block">${e.nid}</a>`
-                    }},
+                    }, "width": "20%"},
+                    {"data": (e)=>{
+                        return `<img src="${e.nationalCardPicURL}"/>`
+                    }, "width": "30%"},
                     {"data": (e)=>{
                         return e.isConfirmedCase? `<span class="badge badge-danger">Oui</span>` : `<span class="badge badge-success">Non</span>`
-                    }},
+                    }, "width": "10%"},
                     {"data": (e)=>{
                         return `
+                            <button id="meets_${e.nid}" type="button" class="btn btn-outline-secondary meetsBtn" data-toggle="modal" data-target="#meetsModal"><i class="fa fa-group"></i>&nbsp; Rencontres</button>
                             <button id="visits_${e.nid}" type="button" class="btn btn-outline-success visitsBtn" data-toggle="modal" data-target="#userVisitsModal"><i class="fa fa-archive"></i>&nbsp; Visites</button>
-                            <button id="notif_${e.nid}" type="button" class="btn btn-outline-primary notifBtn" data-toggle="modal" data-target="#sendNotifModal"><i class="fa fa-share"></i>&nbsp; Send Notification</button>
-                            `
-                    }}
+                            <button id="notif_${e.nid}" type="button" class="btn btn-outline-primary notifBtn" data-toggle="modal" data-target="#sendNotifModal"><i class="fa fa-share"></i>&nbsp; Envoyer Notification</button>
+                        `
+                    }, "width": "40%"}
                 ]
             });
 
             $('#usersTable tbody').on('click', '.visitsBtn', setUserVisitsModal);
             $('#usersTable tbody').on('click', '.notifBtn', setSendNotifModal);
+            $('#usersTable tbody').on('click', '.meetsBtn', setMeetsModal);
     }
 
     const setUserVisitsModal = ()=>{
@@ -49,11 +60,15 @@ jQuery(document).ready(function ($) {
                 {"data": "time"},
                 {"data": (e)=>{
                     return `<button id="places_${e.placeID}" type="button" class="btn btn-link btn-lg btn-block placeInofdBtn" data-toggle="modal" data-target="#placeInfosModal">${e.placeID}</button>`
+                }},
+                {"data": (e)=>{
+                    return `<button id="visits_${e.placeID}_${e.date}_${e.time}" type="button" class="btn btn-outline-success otherVisitsBtn" data-toggle="modal" data-target="#otherVisitsModal"><i class="fa fa-archive"></i>&nbsp; Autres Visiteurs</button>`
                 }}
             ]
         });
 
         $('#visitsTable tbody').on('click', '.placeInofdBtn', setPlaceModal);
+        $('#visitsTable tbody').on('click', '.otherVisitsBtn', setOtherVisitsModal);
     }
 
     const setPlaceModal = ()=>{
@@ -145,6 +160,53 @@ jQuery(document).ready(function ($) {
                     </div>
                 `);
             });
+        });
+    }
+
+    const setOtherVisitsModal = ()=>{
+        let data = {
+            place_id: event.target.id.split('_')[1],
+            date: event.target.id.split('_')[2],
+            time: event.target.id.split('_')[3]
+        };
+
+        $('#userVisitsModal').modal('toggle');
+        $('#otherVisitsModalTitle').html(`Les visiteures de <b>${data.place_id}</b> a <b>${data.date} ${data.time}</b>`);
+
+        $('#otherVisitsTable').DataTable().clear().destroy();
+        $('#otherVisitsTable').DataTable({
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            ajax: {
+                url: `${backendURL}/places/${data.place_id}/users?date=${data.date}&time=${data.time}`,
+                dataSrc: ""
+            },
+            columns: [
+                {data: "nid"}
+            ]
+        });
+    }
+
+    const setMeetsModal = ()=>{
+        $('#userVisitsModalTitle').html(`Les rencontres de <b>${event.target.id.split('_')[1]}</b> dans les 15 deniers jours`);
+        let days = [];
+        let now = new Date();
+
+        for(i = 0 ; i<=15 ; i++){
+            now.setDate((now.getDate()-i));
+            days.push(now.toISOString().substring(0,10));
+        }
+
+        $('#meetsTable').DataTable().clear().destroy();
+        $('#meetsTable').DataTable({
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            ajax: {
+                url: `${backendURL}/users/${event.target.id.split('_')[1]}/meets?dates=${days.join()}`,
+                dataSrc: ""
+            },
+            columns: [
+                {"data": "nid"},
+                {"data": "count"}
+            ]
         });
     }
 });

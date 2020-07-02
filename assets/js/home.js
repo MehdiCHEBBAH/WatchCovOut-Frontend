@@ -2,6 +2,8 @@
     let host = "https://watchcovout-api.herokuapp.com";
     $(document).ready(function () {
         console.log("wa are here 1");
+
+        // get users stats
         $.get(host + "/api/v0/users/", function (data, status) {
             console.log(
                 "wa " +
@@ -10,9 +12,19 @@
                     JSON.stringify(data, null, 2)
             );
 
+            function checkSick(element) {
+                return element.isConfirmedCase 
+            }
             $("#cov-members").text(data.length.toString());
-            $("#cov-confirmed-members").text(data.length.toString());
+            $("#cov-confirmed-members").text(data.filter(checkSick).length.toString());
+            
         });
+
+        // get places stats
+        $.get(host + "/api/v0/places/", function (data, status) {
+            $("#cov-places-number").text(data.length.toString());
+        });
+        
     });
 
     $(document).ready(function () {

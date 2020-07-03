@@ -1,4 +1,4 @@
-const backendURL = `http://localhost:8081/api/v0`;
+const backendURL = `https://watchcovout-api.herokuapp.com/api/v0`;
 jQuery(document).ready(function ($) {
 
     jQuery(document).ready(function ($) {
@@ -94,13 +94,13 @@ jQuery(document).ready(function ($) {
                         zoom: 17
                     }
                     
+                    if (map != undefined) { map.remove(); }
                     // Creating a map object
                     var map = new L.map('map', mapOptions);
                     var marker = L.marker([${data.location.latitude}, ${data.location.longitude}]).addTo(map);
 
                     // Creating a Layer object
                     var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-                    
                     // Adding layer to the map
                     map.addLayer(layer);
                 </script>

@@ -1,17 +1,9 @@
 (function ($) {
     let host = "https://watchcovout-api.herokuapp.com";
     $(document).ready(function () {
-        console.log("wa are here 1");
 
         // get users stats
         $.get(host + "/api/v0/users/", function (data, status) {
-            console.log(
-                "wa " +
-                    $("#cov-members").text +
-                    " are here" +
-                    JSON.stringify(data, null, 2)
-            );
-
             function checkSick(element) {
                 return element.isConfirmedCase 
             }
@@ -24,11 +16,16 @@
         $.get(host + "/api/v0/places/", function (data, status) {
             $("#cov-places-number").text(data.length.toString());
         });
+
+        let now = new Date();
+        $.get( host + `/api/v0/users/?suspect&dates=${now.toISOString().substring(0,10)}`, (data, status)=>{
+            console.log(data);
+            $("#cov-suspect-members").text(data.length.toString());
+        });
         
     });
 
     $(document).ready(function () {
-        console.log("ready");
         mapboxgl.accessToken =
             "pk.eyJ1IjoieWFhY2luZTEyIiwiYSI6ImNrYzNrd2gydjEyemEydGxrbzhleWkwaHIifQ.TnOnKQn9B_CR5RpwZnyE0A";
         var map = new mapboxgl.Map({
